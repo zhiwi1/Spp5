@@ -1,0 +1,16 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "6f6a8f30-e81d-4896-83d4-56a0e3ee3f91": {
+      "ProjectGuid": "6f6a8f30-e81d-4896-83d4-56a0e3ee3f91",
+      "DisplayName": "DependencyInjectionContainer",
+      "ColorIndex": 0
+    },
+    "3e3aabbf-3e2d-4868-8485-d0066c7a8a59": {
+      "ProjectGuid": "3e3aabbf-3e2d-4868-8485-d0066c7a8a59",
+      "DisplayName": "DependencyInjectionContainer.UnitTests",
+      "ColorIndex": 1
+    }
+  },
+  "NextColorIndex": 2
+}
