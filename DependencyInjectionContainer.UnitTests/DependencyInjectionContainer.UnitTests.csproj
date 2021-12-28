@@ -50,6 +50,10 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessoryClasses\Class1.cs" />
+    <Compile Include="AccessoryClasses\Class2.cs" />
+    <Compile Include="AccessoryClasses\Interface1.cs" />
+    <Compile Include="AccessoryClasses\Interface2.cs" />
     <Compile Include="AccessoryClasses\MyGenericImplementation1.cs" />
     <Compile Include="AccessoryClasses\IMyGenericInterface.cs" />
     <Compile Include="AccessoryClasses\MyGenericImplementation2.cs" />

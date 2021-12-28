@@ -9,3 +9,9 @@ C:\Users\Ivan_Zhyuliuk\Source\Repos\MPP-DependencyInjectionContainer\DependencyI
 C:\Users\Ivan_Zhyuliuk\Source\Repos\MPP-DependencyInjectionContainer\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.csproj.CoreCompileInputs.cache
 C:\Users\Ivan_Zhyuliuk\Source\Repos\MPP-DependencyInjectionContainer\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.dll
 C:\Users\Ivan_Zhyuliuk\Source\Repos\MPP-DependencyInjectionContainer\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.pdb
+C:\Users\Ivan_Zhyuliuk\source\repos\Spp5\DependencyInjectionContainer\bin\Debug\DependencyInjectionContainer.dll
+C:\Users\Ivan_Zhyuliuk\source\repos\Spp5\DependencyInjectionContainer\bin\Debug\DependencyInjectionContainer.pdb
+C:\Users\Ivan_Zhyuliuk\source\repos\Spp5\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.csproj.AssemblyReference.cache
+C:\Users\Ivan_Zhyuliuk\source\repos\Spp5\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.csproj.CoreCompileInputs.cache
+C:\Users\Ivan_Zhyuliuk\source\repos\Spp5\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.dll
+C:\Users\Ivan_Zhyuliuk\source\repos\Spp5\DependencyInjectionContainer\obj\Debug\DependencyInjectionContainer.pdb

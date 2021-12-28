@@ -31,7 +31,7 @@ namespace DependencyInjectionContainer.UnitTests
                 typeof(MyImplementation1),
                 typeof(MyImplementation2)
             };
-            CollectionAssert.AreEquivalent(expectedRegisteredTypes, 
+            CollectionAssert.AreEquivalent(expectedRegisteredTypes,
                 registeredImplementations.Select((implementation) => implementation.ImplementationType).ToList());
         }
 
@@ -124,7 +124,7 @@ namespace DependencyInjectionContainer.UnitTests
             CollectionAssert.AreEquivalent(expectedInstancesTypes,
                 instances.Select((instance) => instance.GetType()).ToList());
 
-            Assert.AreEqual(typeof(MyImplementation1), 
+            Assert.AreEqual(typeof(MyImplementation1),
                 instances.OfType<MyGenericImplementation1<IMyInterface>>().First().field.GetType());
         }
 
@@ -166,6 +166,19 @@ namespace DependencyInjectionContainer.UnitTests
             Assert.AreEqual(1, instances.Count());
             Assert.AreEqual(typeof(MyImplementation1), instances.First().intfImpl1.GetType());
             Assert.AreEqual(typeof(MyImplementation2), instances.First().intfImpl2.GetType());
+        }
+
+        [TestMethod]
+        public void AbATest()
+        {
+            config.Register<Interface1, Class1>(name: "1");
+            config.Register<Interface2, Class2>(name: "1");
+            var provider = new DependencyProvider(config);
+            var a = provider.Resolve<Interface1>().OfType<Class1>();
+            var b = provider.Resolve<Interface2>().OfType<Class2>();
+            Assert.AreSame(a.First(), b.First().interface1);
+
+
         }
     }
 }
