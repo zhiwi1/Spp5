@@ -9,7 +9,7 @@ namespace DependencyInjectionContainer
 {
     public class DependencyProvider : IDependencyProvider
     {
-        protected readonly IDependenciesConfiguration configuration;
+        protected readonly IDependencyConfig configuration;
 
         protected readonly ConcurrentDictionary<int, Stack<Type>> recursionTypesExcluder;
 
@@ -151,7 +151,7 @@ namespace DependencyInjectionContainer
             return instance;
         }
 
-        public DependencyProvider(IDependenciesConfiguration configuration)
+        public DependencyProvider(IDependencyConfig configuration)
         {
             this.configuration = configuration;
             recursionTypesExcluder = new ConcurrentDictionary<int, Stack<Type>>();
