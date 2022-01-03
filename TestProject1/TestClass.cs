@@ -86,17 +86,35 @@
             
             }
 
-            class ClassB : IB
+    interface IC
+    {
+
+    }
+    class ClassB : IB
             {
                 public IA ia { get; set; }
-                public ClassB(IA ia)
+                public IC ic { get; set; }
+                public ClassB(IA ia, IC ic)
                 {
                     this.ia = ia;
+                    this.ic = ic;
                 }
              
             }
 
-            interface IA
+
+
+            class ClassC : IC
+            {
+                public IB ib { get; set; }
+                public ClassC(IB iB)
+                {
+                    this.ib = ib;
+                }
+
+            }
+
+    interface IA
             {
             
             }

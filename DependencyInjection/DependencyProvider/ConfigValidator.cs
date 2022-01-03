@@ -16,12 +16,20 @@ namespace DependencyInjection.DependencyProvider
             this._configuration = configuration;
             this._nestedTypes = new Stack<Type>();
         }
-
+        /**
+         *  function that  checks if the type is in the container
+         * @param Type type
+         * @return bool
+         **/
         private bool IsInContainer(Type type)
         {
             return this._configuration.DependenciesDictionary.ContainsKey(type);
         }
-
+        /**
+        *  function that  checks if the type can be created
+        * @param Type type
+        * @return bool
+        **/
         private bool CanBeCreated(Type instanceType)
         {
             this._nestedTypes.Push(instanceType);
@@ -54,7 +62,10 @@ namespace DependencyInjection.DependencyProvider
             this._nestedTypes.Pop();
             return true;
         }
-
+        /**
+        *  function that  checks if the all types can be created
+        * @return bool
+        **/
         public bool Validate()
         {
             return this._configuration.DependenciesDictionary.Values.

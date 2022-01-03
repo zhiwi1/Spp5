@@ -20,7 +20,22 @@ namespace DependencyInjection.DependencyConfiguration
         {
             Register(typeof(TDependency), typeof(TImplementation), ttl, number);
         }
+        private readonly List<Type> _excludedTypes = new List<Type>();
 
+        internal void ExcludeType(Type type)
+        {
+            _excludedTypes.Add(type);
+        }
+
+        internal void RemoveFromExcluded(Type type)
+        {
+            _excludedTypes.Remove(type);
+        }
+
+        internal bool IsExcluded(Type type)
+        {
+            return _excludedTypes.Contains(type);
+        }
         public void Register(Type dependencyType, Type implementType, LifeCycle ttl, ImplNumber number)
         {
             if (!IsDependency(implementType, dependencyType))
@@ -52,5 +67,6 @@ namespace DependencyInjection.DependencyConfiguration
             //Определяет, может ли экземпляр указанного типа c быть назначен переменной текущего типаОпределяет, может ли экземпляр указанного типа c быть назначен переменной текущего типа
             return implementation.IsAssignableFrom(dependency) || implementation.GetInterfaces().Any(i => i.ToString() == dependency.ToString());
         }
+
     }
 }

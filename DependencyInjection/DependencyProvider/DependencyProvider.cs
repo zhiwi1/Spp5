@@ -16,7 +16,9 @@ namespace DependencyInjection.DependencyProvider
         public readonly Dictionary<Type, List<SingletonContainer>> _singletons;
         private readonly Stack<Type> _recursionStack = new Stack<Type>();
         private Dictionary<Type, Type> nullParameters = new Dictionary<Type, Type>();
-
+        private static List<object> toFill = new List<object>();
+        private ResolveABAService resolveService;
+        
         public DependencyProvider(DependencyConfig configuration)
         {
             ConfigValidator configValidator = new ConfigValidator(configuration);
@@ -24,15 +26,175 @@ namespace DependencyInjection.DependencyProvider
             {
                 throw new ArgumentException("Wrong configuration");
             }
-
+         
             this._singletons = new Dictionary<Type, List<SingletonContainer>>();
             this._configuration = configuration;
+            this.resolveService = ResolveABAService.getInstance(this);
+        }
+        private void fillWithSingleton(object singleton)
+        {
+            foreach (object o in toFill)
+            {
+                var fields = o.GetType().GetFields();
+                foreach (FieldInfo field in fields)
+                {
+                    if (field.FieldType.IsAssignableFrom(singleton.GetType()))
+                    {
+                        field.SetValue(o, singleton);
+                    }
+                }
+                var properties = o.GetType().GetProperties();
+                foreach (PropertyInfo property in properties)
+                {
+                    if (property.PropertyType.IsAssignableFrom(singleton.GetType()) && property.CanWrite)
+                    {
+                        property.SetValue(o, singleton);
+                    }
+                }
+
+            }
+        }
+        public static object CreateInstance(Type type, DependencyConfig dependencyConfiguration)
+        {
+
+            var constructors = ChooseConstructors(type).ToList();
+            if (constructors.Count == 0) throw new Exception($"{type} has no injectable constructor");
+            foreach (var constructor in constructors)
+            {
+                var parameters = constructor.GetParameters();
+                var arguments = ProvideParameters(parameters, dependencyConfiguration);
+                return constructor.Invoke(arguments.ToArray());
+            }
+
+            throw new Exception($"Can't create instance of {type}");
         }
 
+        private static IEnumerable<object> ProvideParameters(IEnumerable<ParameterInfo> parameters,
+            DependencyConfig dependencyConfiguration)
+        {
+            var provider = new DependencyProvider(dependencyConfiguration);
+            return parameters.Select(provider.Resolve);
+        }
+        /*        private static IEnumerable<object> ProvideFields(IEnumerable<FieldInfo> fields, DependenciesConfiguration dependencyConfiguration)
+                {
+
+                    var provider = new DependencyProvider(dependencyConfiguration);
+                    return fields.Select(provider.Resolve);
+                }*/
+
+        private static IEnumerable<ConstructorInfo> ChooseConstructors(Type type)
+        {
+            return type.GetConstructors()
+                .Where(HasConstructedParameters);
+        }
+
+        private static bool HasConstructedParameters(ConstructorInfo constructor)
+        {
+            return constructor.GetParameters()
+                .All(IsParameterConstructable);
+        }
+
+        private static bool IsParameterConstructable(ParameterInfo parameter)
+        {
+            var parameterType = parameter.GetType();
+            return parameterType.IsClass;
+        }
+    
+    private object ResolveDependency(Dependency dependency)
+        {
+            object result = null;
+
+            if (_configuration.IsExcluded(dependency.Type))
+                //throw new DependencyException($"Dependency type {dependency.Type} leads to recursion!");
+                return null;
+            _configuration.ExcludeType(dependency.Type);
+
+            if (dependency.LifeCycle == LifeCycle.InstancePerDependency)
+            {
+                result = CreateInstance(dependency.Type, _configuration);
+            }
+            else if (dependency.LifeCycle == LifeCycle.Singleton)
+            {
+                lock (dependency)
+                {
+                    if (dependency.Instance == null)
+                    {
+                        result =CreateInstance(dependency.Type, _configuration);
+                        dependency.Instance = result;
+                        //singletons.Add(result);
+                        fillWithSingleton(result);
+                    }
+                    else
+                    {
+                        result = dependency.Instance;
+                    }
+                }
+            }
+            toFill.Add(result);
+            //fillObjects();
+            _configuration.RemoveFromExcluded(dependency.Type);
+
+            return result;
+        }
+        /* public void FinalInit(Type type )
+         {
+             foreach (var s in _singletons)
+             {
+
+              PropertyInfo[] prp=  s.Value[0].Instance.GetType().GetProperties();
+                 foreach(var p in prp)
+                 {
+                     if (p.PropertyType.IsAssignableFrom(s.Value[0].Instance.GetType()) && p.CanWrite)
+                     {
+                         p.SetValue(o, s.Value[0].Instance);
+                     }
+                     //  Type myTypeB =s.Value[0].Instance.GetType();
+                     //  Console.WriteLine(myTypeB);
+                     //  FieldInfo myFieldInfo1 = myTypeB.GetField("instance",
+                     //      BindingFlags.NonPublic | BindingFlags.Instance);
+
+                     if (p.GetValue(s.Value[0].Instance) == null ){
+                         SingletonContainer container;
+                         object replaceObject = Resolve(type, ImplNumber.Any);
+                         p.SetValue(s.Value[0].Instance, replaceObject);
+                     }
+                 }
+
+             }
+         }*/
+        /*  private void fillWithSingleton(object singleton)
+          {
+              foreach (object o in toFill)
+              {
+                  var fields = o.GetType().GetFields();
+                  foreach (FieldInfo field in fields)
+                  {
+                      if (field.FieldType.IsAssignableFrom(singleton.GetType()))
+                      {
+                          field.SetValue(o, singleton);
+                      }
+                  }
+                  var properties = o.GetType().GetProperties();
+                  foreach (PropertyInfo property in properties)
+                  {
+                      if (property.PropertyType.IsAssignableFrom(singleton.GetType()) && property.CanWrite)
+                      {
+                          property.SetValue(o, singleton);
+                      }
+                  }
+
+              }
+          }*/
+        /**
+         *  functions that  resolves dependencies using recursion
+         * @param ImplNumber number 
+         * @return TDependency
+        **/
         public TDependency Resolve<TDependency>(ImplNumber number = ImplNumber.Any)
             where TDependency : class
         {
-            return (TDependency)Resolve(typeof(TDependency), number);
+            TDependency dep = (TDependency)Resolve(typeof(TDependency), number);
+            return dep;
         }
 
         public object Resolve(Type dependencyType, ImplNumber number = ImplNumber.Any)
@@ -53,9 +215,16 @@ namespace DependencyInjection.DependencyProvider
             else
             {
                 ImplContainer container = GetImplContainerByDependencyType(dependencyType, number);
-                Type requiredType = GetGeneratedType(dependencyType, container.ImplementationsType);
-                result = this.ResolveNonIEnumerable(requiredType, container.TimeToLive, dependencyType, container.ImplNumber);
+      
+                
+                    Type requiredType = GetGeneratedType(dependencyType, container.ImplementationsType);
+
+                    result = this.ResolveNonIEnumerable(requiredType, container.TimeToLive, dependencyType, container.ImplNumber);
+
+              
             }
+
+           
 
             return result;
         }
@@ -63,6 +232,7 @@ namespace DependencyInjection.DependencyProvider
         private object ResolveNonIEnumerable(Type implType, LifeCycle ttl, Type dependencyType,
             ImplNumber number)
         {
+            
             if (ttl != LifeCycle.Singleton)
             {
                 return CreateInstance(dependencyType,implType);
@@ -70,36 +240,19 @@ namespace DependencyInjection.DependencyProvider
 
             if (!IsInSingletons(dependencyType, implType, number))
             {
+               
                 var result = CreateInstance(dependencyType,implType);
                 AddToSingletons(dependencyType, result, number);
                     _recursionStack.Pop();
-                    replaceParametersOfNullObject(dependencyType);
+               
+                resolveService.replaceParametersOfNullObject(dependencyType,nullParameters,_recursionStack);
             }
+            //FinalInit(dependencyType);
             return _singletons[dependencyType]
                    .Find(singletonContainer => number.HasFlag(singletonContainer.ImplNumber))
                    ?.Instance;
         }
-
-        private void replaceParametersOfNullObject(Type replaceType)
-        {
-            foreach(KeyValuePair<Type, Type> keyValuePair in nullParameters)
-            {
-                if (replaceType == keyValuePair.Value)
-                {
-                    object objectWithNull = Resolve(keyValuePair.Key, ImplNumber.Any);
-                    PropertyInfo[] propertyInfos = objectWithNull.GetType().GetProperties();
-                    for(int i = 0; i < propertyInfos.Length; i++)
-                    {
-                        if (propertyInfos[i].PropertyType == keyValuePair.Value){
-                            _recursionStack.Pop();
-                            object replaceObject = Resolve(replaceType, ImplNumber.Any);
-                            objectWithNull.GetType().GetProperty(propertyInfos[i].Name)?.SetValue(objectWithNull, replaceObject);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+      
 
         private object CreateInstance(Type dependecyType, Type implementationType)
         {
@@ -214,6 +367,23 @@ namespace DependencyInjection.DependencyProvider
         {
             var lst = this._singletons.ContainsKey(dependencyType) ? this._singletons[dependencyType] : null;
             return lst?.Find(container => number.HasFlag(container.ImplNumber) && container.Instance.GetType() == implType) is not null;
+        }
+    }
+    public class Dependency
+    {
+        public Type Type { get; }
+
+        public LifeCycle LifeCycle { get; }
+
+        public object Key { get; }
+
+        public object Instance { get; set; }
+
+        public Dependency(Type type, LifeCycle lifeCycle, object key)
+        {
+            Key = key;
+            Type = type;
+            LifeCycle = lifeCycle;
         }
     }
 }

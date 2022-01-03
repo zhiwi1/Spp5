@@ -11,7 +11,7 @@ namespace DependencyInjection.DependencyProvider
     {
         public readonly ImplNumber ImplNumber;
 
-        public readonly object Instance;
+        public object Instance { get; set; }
 
         public SingletonContainer(object instance, ImplNumber number)
         {

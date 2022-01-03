@@ -69,6 +69,8 @@ namespace TestProject1
             Assert.AreEqual(innerInterface.GetType(), typeof(Class), "Wrong type of created dependency.");
         }
 
+      
+
         [Test]
         public void DoubleDependencyProvider()
         {
@@ -112,36 +114,17 @@ namespace TestProject1
             var provider = new DependencyProvider(dependencies);
             dependencies.Register<IA, ClassA>(LifeCycle.Singleton, ImplNumber.First);
             dependencies.Register<IB, ClassB>(LifeCycle.Singleton, ImplNumber.First);
+            dependencies.Register<IC, ClassC>(LifeCycle.Singleton, ImplNumber.First);
             ClassA a = (ClassA)provider.Resolve<IA>(ImplNumber.First);
             ClassB b = (ClassB)provider.Resolve<IB>(ImplNumber.First);
+            ClassC c = (ClassC)provider.Resolve<IC>(ImplNumber.First);
             Assert.AreSame(a,b.ia);
+            Assert.AreSame(b.ic, c);
+            Assert.AreSame(c.ib, b);
         }
         
-        
-        [Test]
-        public void selfdependency_Test()
-        {
-            var dependencies = new DependencyConfig();
-            var provider = new DependencyProvider(dependencies);
-            dependencies.Register<ISelf, Self>(LifeCycle.Singleton, ImplNumber.First);
-            Self self = (Self)provider.Resolve<ISelf>(ImplNumber.First);
-            Assert.IsTrue(self.iself.GetType().Equals(typeof(Self)));
-            Assert.AreSame(self,self.iself);
-        }
-        
-        [Test]
-        public void ABCA_test()
-        {
-            var dependencies = new DependencyConfig();
-            var provider = new DependencyProvider(dependencies);
-            dependencies.Register<IQ, Q>(LifeCycle.Singleton, ImplNumber.First);
-            dependencies.Register<IW, W>(LifeCycle.Singleton, ImplNumber.First);
-            dependencies.Register<IE, E>(LifeCycle.Singleton, ImplNumber.First);
-            Q q = (Q)provider.Resolve<IQ>(ImplNumber.First);
-            W w = (W)provider.Resolve<IW>(ImplNumber.First);
-            E e = (E)provider.Resolve<IE>(ImplNumber.Any);
-            Assert.AreSame(q,e.iq);
-        }
+   
+    
     }
     
 }
