@@ -8,6 +8,7 @@ namespace DependencyInjection
     public class DependencyKeyAttribute : Attribute
     {
         public ImplNumber ImplNumber { get; }
+        public object Key { get; internal set; }
 
         public DependencyKeyAttribute(ImplNumber number)
         {

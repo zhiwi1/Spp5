@@ -30,16 +30,16 @@ namespace TestProject1
         public void Init_DependenciesConfigurationCreatedSuccessfully()
         {
             Assert.NotNull(DependenciesConfiguration1);
-            Assert.IsNotEmpty(DependenciesConfiguration1.DependenciesDictionary);
+            Assert.IsNotEmpty(DependenciesConfiguration1._dependencies);
             Assert.NotNull( DependenciesConfiguration2);
-            Assert.IsNotEmpty(DependenciesConfiguration2.DependenciesDictionary);
+            Assert.IsNotEmpty(DependenciesConfiguration2._dependencies);
         }
         [Test]
         public void RegisteringDependencies()
         {
-            bool keyOfISomeInterface =DependenciesConfiguration1.DependenciesDictionary.ContainsKey(typeof(ISomeInterface));
-            bool keyOfITestClass =DependenciesConfiguration1.DependenciesDictionary.ContainsKey(typeof(ITestClass));
-            int numberOfKeys=DependenciesConfiguration1.DependenciesDictionary.Keys.Count;
+            bool keyOfISomeInterface =DependenciesConfiguration1._dependencies.ContainsKey(typeof(ISomeInterface));
+            bool keyOfITestClass =DependenciesConfiguration1._dependencies.ContainsKey(typeof(ITestClass));
+            int numberOfKeys=DependenciesConfiguration1._dependencies.Keys.Count;
             Assert.IsTrue(keyOfISomeInterface, "Dependency dictionary hasn't key ISomeInterface.");
             Assert.IsTrue(keyOfITestClass, "Dependency dictionary hasn't key ITestClass.");
             Assert.AreEqual(numberOfKeys, 2,"Dependency dictionary has another number of keys.");
@@ -48,10 +48,10 @@ namespace TestProject1
         [Test]
         public void RegisterDoubleDependency()
         {
-            var containers = DependenciesConfiguration2.DependenciesDictionary[typeof(ISomeInterface)];
-            var firstType = containers[0].ImplementationsType;
-            var secondType = containers[1].ImplementationsType;
-            int numberOfKeys = DependenciesConfiguration2.DependenciesDictionary.Keys.Count;
+            var containers = DependenciesConfiguration2._dependencies[typeof(ISomeInterface)];
+            var firstType = containers[0].Type;
+            var secondType = containers[1].Type;
+            int numberOfKeys = DependenciesConfiguration2._dependencies.Keys.Count;
             Assert.AreEqual(containers.Count, 2, "Wrong number of dependencies of IInterface.");
             Assert.AreEqual(firstType, typeof(Class), "Another type of class Class in container.");
             Assert.AreEqual(secondType, typeof(Class2), "Another type of class Class2 in container.");
@@ -69,43 +69,11 @@ namespace TestProject1
             Assert.AreEqual(innerInterface.GetType(), typeof(Class), "Wrong type of created dependency.");
         }
 
-      
 
-        [Test]
-        public void DoubleDependencyProvider()
-        {
-            var provider = new DependencyProvider(DependenciesConfiguration2);
-            var result = provider.Resolve<ITestClass>();
-            var innerInterface = ((TestClass2)result).isomeInterface;
-            Assert.AreEqual(innerInterface.GetType(),typeof(Class2),"Wrong type of created instance.");
-        }
 
-        [Test]
-        public void SingletonObj()
-        {
-            var dep1 = new DependencyConfig();
-            dep1.Register<ISomeInterface, Class>(LifeCycle.Singleton);
-            dep1.Register<ITestClass, TestClass>(LifeCycle.Singleton);
-            var provider = new DependencyProvider(dep1);
-            var obj11 = provider.Resolve<ITestClass>();
-            var obj12 = provider.Resolve<ITestClass>();
-            var b1 = obj11 == obj12;
-            
-            int count1 = provider._singletons.Count;
-            Assert.AreEqual(count1, 2, "Wrong number of Singleton objects in Dictionary for Singleton");
-            var dep2 = new DependencyConfig();
-            dep2.Register<ISomeInterface, Class>(LifeCycle.InstancePerDependency);
-            dep2.Register<ITestClass, TestClass>(LifeCycle.InstancePerDependency);
-            var provider2 = new DependencyProvider(dep2);
-            var obj21 = provider2.Resolve<ITestClass>();
-            var obj22 = provider2.Resolve<ITestClass>();
-            var b2 = obj21 == obj22;
+       
 
-            int count2 = provider2._singletons.Count;
-            Assert.AreEqual(count2, 0, "Wrong number of Singleton objects in Dictionary for InstancePerDependency");
-            Assert.IsTrue(b1, "Different objects for singleton object.");
-            Assert.IsFalse(b2, "The same object using InstancePerDependency");
-        }
+
         // А-Б-А
         [Test]
         public void ABA_test()

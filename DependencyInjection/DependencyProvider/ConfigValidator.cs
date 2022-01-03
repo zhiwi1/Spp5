@@ -23,7 +23,7 @@ namespace DependencyInjection.DependencyProvider
          **/
         private bool IsInContainer(Type type)
         {
-            return this._configuration.DependenciesDictionary.ContainsKey(type);
+            return this._configuration._dependencies.ContainsKey(type);
         }
         /**
         *  function that  checks if the type can be created
@@ -68,9 +68,9 @@ namespace DependencyInjection.DependencyProvider
         **/
         public bool Validate()
         {
-            return this._configuration.DependenciesDictionary.Values.
+            return this._configuration._dependencies.Values.
                 All(implementations => implementations.
-                    All(implementation => CanBeCreated(implementation.ImplementationsType)));
+                    All(implementation => CanBeCreated(implementation.Type)));
         }
     }
 }
